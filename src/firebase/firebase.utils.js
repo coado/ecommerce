@@ -39,8 +39,42 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
         return userRef;
 }
 
+// we did it only once, just for pulling shop data into firebase
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+        const collectionRef = firestore.collection(collectionKey);
+        // batch group all our calls
+        // we dont have to call them individualy
+        const batch = firestore.batch();
+        objectsToAdd.forEach(obj => {
+                const newDocRef = collectionRef.doc();
+                batch.set(newDocRef, obj);
+        });
+        // fire off batch request.
+        // returning promise
+        return await batch.commit();
+}
+
 
 firebase.initializeApp(config);
+
+export const convertCollectionsSnapshotToMap = (collections) => {
+        const transformedCollection = collections.docs.map(doc => {
+                const {title, items} = doc.data();
+                return {
+                                // changes string to URL that program can read
+                                // removing spaces, characters etc.
+                        routeName: encodeURI(title.toLowerCase()),
+                        id: doc.id,
+                        title,
+                        items
+                }
+        });
+        // changing array into one big object
+        return transformedCollection.reduce((accumulator, collection) => {
+                accumulator[collection.title.toLowerCase()] = collection;
+                return accumulator;
+        }, {})
+}
 
 export const auth = firebase.auth();
 export const firestore = firebase.firestore();

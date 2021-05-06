@@ -14,7 +14,8 @@ const CollectionPage = ({ collection }) => {
         <h2 className='title'>{title}</h2>
         <div className='items'>
             {
-                items.map(item => <CollectionItem key={item.id} item={item}/>)
+               items ?  items.map(item => <CollectionItem key={item.id} item={item}/>) : null
+                
             }
         </div>
     </div>
